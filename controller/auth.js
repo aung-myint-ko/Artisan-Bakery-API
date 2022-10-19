@@ -64,7 +64,7 @@ export const SignInAdmin = async (req, res, next) => {
     if (!findUser.isAdmin) {
       next(CreateError(403, "You are not admin, Only admins are allowed"));
     } else {
-      const token = jwt.sign({ id: findUser._id }, process.env.Token_key);
+      const token = jwt.sign({ id: findUser._id }, process.env.TOKEN_KEY);
       const { password, ...other } = findUser._doc;
       res
         .cookie("access_token", token, {
