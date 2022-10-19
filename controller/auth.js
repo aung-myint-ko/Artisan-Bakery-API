@@ -9,7 +9,7 @@ export const SignUp = async (req, res, next) => {
     const hash = bcrypt.hashSync(req.body.password, salt);
     const newUser = new User({ ...req.body, password: hash });
     const savedUser = await newUser.save();
-    const token = jwt.sign({ id: savedUser._id }, process.env.Token_key);
+    const token = jwt.sign({ id: savedUser._id }, process.env.TOKEN_KEY);
 
     const { password, ...other } = savedUser._doc;
     res
@@ -35,7 +35,7 @@ export const SignIn = async (req, res, next) => {
     if (!comparePassword) {
       next(CreateError(403, "Your password is incorrect"));
     } else {
-      const token = jwt.sign({ id: findUser._id }, process.env.Token_key);
+      const token = jwt.sign({ id: findUser._id }, process.env.TOKEN_KEY);
       const { password, ...other } = findUser._doc;
       res
         .cookie("access_token", token, {
