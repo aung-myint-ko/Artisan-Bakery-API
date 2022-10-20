@@ -9,7 +9,6 @@ const UserSchema = new mongoose.Schema(
     },
     imageUrl: {
       type: String,
-      default: null,
     },
     email: {
       type: String,

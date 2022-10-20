@@ -102,9 +102,7 @@ export const UpdatingHistory = async (req, res, next) => {
 export const AddingPhoto = async (req, res, next) => {
   try {
     const customerId = req.user.id;
-    const putPhoto = await User.findByIdAndUpdate(customerId, {
-      $push: { imageUrl: req.body },
-    });
+    const putPhoto = await User.findByIdAndUpdate(customerId, req.body);
     res.status(200).json(putPhoto);
   } catch (err) {
     next(err);
