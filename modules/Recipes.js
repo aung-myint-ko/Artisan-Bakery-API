@@ -1,7 +1,4 @@
 import mongoose from "mongoose";
-import slug from "mongoose-slug-generator";
-mongoose.plugin(slug);
-
 const RecipesSchema = new mongoose.Schema(
   {
     name: {
