@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import slug from "mongoose-slug-generator";
 const RecipesSchema = new mongoose.Schema(
   {
     name: {
@@ -29,5 +30,6 @@ const RecipesSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+RecipesSchema.plugin(slug);
 
 export default mongoose.model("Recipes", RecipesSchema);

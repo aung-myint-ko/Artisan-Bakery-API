@@ -1,6 +1,7 @@
 import User from "../modules/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { serialize } from "cookie";
 import { CreateError } from "./error.js";
 
 export const SignUp = async (req, res, next) => {
@@ -66,12 +67,12 @@ export const SignInAdmin = async (req, res, next) => {
     } else {
       const token = jwt.sign({ id: findUser._id }, process.env.TOKEN_KEY);
       const { password, ...other } = findUser._doc;
-      res
-        .cookie("access_token", token, {
-          httpOnly: true,
-        })
-        .status(200)
-        .json(other);
+      const serialized = serialize("access_token", token, {
+        httpOnly: true,
+        path: "/",
+      });
+      res.setHeader("Set-Cookie", serialized);
+      res.status(200).json(other);
     }
   } catch (err) {
     next(err);
