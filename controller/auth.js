@@ -68,8 +68,9 @@ export const SignInAdmin = async (req, res, next) => {
       const token = jwt.sign({ id: findUser._id }, process.env.TOKEN_KEY);
       const { password, ...other } = findUser._doc;
       const serialized = serialize("access_token", token, {
-        httpOnly: true,
+        sameSite: "none",
         path: "/",
+        secure: true,
       });
       res.setHeader("Set-Cookie", serialized);
       res.status(200).json(other);

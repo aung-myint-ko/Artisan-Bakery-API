@@ -14,7 +14,7 @@ app.use(express.urlencoded());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: true,
+    origin: "https://artisan-bakery.vercel.app",
     credentials: true,
   })
 );
