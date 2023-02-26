@@ -7,6 +7,10 @@ const UserSchema = new mongoose.Schema(
       unique: true,
       required: true,
     },
+    imageId: {
+      type: String,
+      default: null,
+    },
     imageUrl: {
       type: String,
       default: null,

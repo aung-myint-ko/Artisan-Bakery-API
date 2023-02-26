@@ -1,14 +1,25 @@
 import Recipes from "../modules/Recipes.js";
 import User from "../modules/User.js";
 import { CreateError } from "./error.js";
+import cloudinary from "../cloudinary.js";
+import slugify from "slugify";
 
 export const AddingRecipe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
     if (user.isAdmin) {
-      const newRecipe = new Recipes(req.body);
-      const savedRecipe = await newRecipe.save();
-      res.status(201).json("successfully Created and added one recipe");
+      const { name, image } = req.body;
+      const imageLink = await cloudinary.v2.uploader.upload(image, {
+        folder: "artisan-bakery/recipes",
+        public_id: name.toLowerCase().replaceAll(" ", "-"),
+      });
+      const newRecipe = new Recipes({
+        ...req.body,
+        imageId: imageLink.public_id,
+        imageUrl: imageLink.secure_url,
+      });
+      await newRecipe.save();
+      res.status(201).json("successfully created and added one recipe");
     } else {
       res.status(403).json("Only admin can create the data");
     }
@@ -38,17 +49,44 @@ export const ShowAllRecipes = async (req, res, next) => {
 
 export const UpdateRecipe = async (req, res, next) => {
   try {
+    let imageLink, slug;
+    let imageValue = false;
+    const { name, image, variety, desc, price } = req.body;
     const params = req.params.slug;
     const user = await User.findById(req.user.id);
     if (user.isAdmin) {
       const findRecipe = await Recipes.findOne({ slug: params });
       if (!findRecipe) next(CreateError(404, "recipe not found"));
-      const recipe = await Recipes.findOneAndUpdate(
+
+      //Check whether new name is given or not
+      if (name) {
+        slug = slugify(name, { lower: true });
+      }
+      //Check whether new image is given or not
+      if (image) {
+        await cloudinary.v2.uploader.destroy(findRecipe.imageId);
+        imageLink = await cloudinary.v2.uploader.upload(image, {
+          folder: "artisan-bakery/recipes",
+          public_id: name.toLowerCase().replaceAll(" ", "-"),
+        });
+        imageValue = true;
+      }
+      const updatedRecipe = await Recipes.findOneAndUpdate(
         { slug: params },
-        { $set: req.body },
+        {
+          $set: {
+            name: name || findRecipe.name,
+            slug: slug || findRecipe.slug,
+            variety: variety || findRecipe.variety,
+            desc: desc || findRecipe.desc,
+            imageId: imageValue ? imageLink.public_id : findRecipe.imageId,
+            imageUrl: imageValue ? imageLink.secure_url : findRecipe.imageUrl,
+            price: price || findRecipe.price,
+          },
+        },
         { new: true }
       );
-      res.status(201).json(recipe);
+      res.status(201).json(updatedRecipe);
     } else {
       next(CreateError(403, "Only admin can update the data"));
     }
@@ -75,6 +113,20 @@ export const DeleteRecipe = async (req, res, next) => {
       const findRecipe = await Recipes.findOne({ slug: params });
       if (!findRecipe) next(CreateError(404, "recipe not found"));
       await Recipes.findOneAndDelete({ slug: params });
+      res.status(200).json("Successfully deleted");
+    } else {
+      res.status(403).json("Only admin can delete the data");
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const DeleteAllRecipes = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (user.isAdmin) {
+      await Recipes.deleteMany({});
       res.status(200).json("Successfully deleted");
     } else {
       res.status(403).json("Only admin can delete the data");

@@ -2,8 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv, { config } from "dotenv";
 import cookieParser from "cookie-parser";
-import RecipesRoute from "./routes/recipes.js";
-import SignUp from "./routes/auth.js";
+import ApiRoutes from "./routes/api.routes.js";
 import cors from "cors";
 const app = express();
 dotenv.config();
@@ -31,8 +30,7 @@ const DB_connection = () => {
 };
 
 //Routes
-app.use("/api/recipes", RecipesRoute);
-app.use("/api/auth", SignUp);
+app.use("/api", ApiRoutes);
 
 //Error Handling
 app.use((err, req, res, next) => {
