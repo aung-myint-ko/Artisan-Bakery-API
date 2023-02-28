@@ -123,7 +123,9 @@ export const AddingPhoto = async (req, res, next) => {
     }
     const imageLink = await cloudinary.v2.uploader.upload(req.body.image, {
       folder: "artisan-bakery/user",
-      public_id: user.name.toLowerCase().replaceAll(" ", "-"),
+      public_id: user.name.includes(" ")
+        ? user.name.toLowerCase().replaceAll(" ", "-")
+        : user.name.toLowerCase(),
     });
 
     await User.findByIdAndUpdate(
@@ -163,9 +165,10 @@ export const GetAllUser = async (req, res, next) => {
 //delete specific user [only for admin]
 export const DeleteUser = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id);
-    if (user.isAdmin) {
-      await User.findByIdAndDelete(req.params.id);
+    const admin = await User.findById(req.user.id);
+    if (admin.isAdmin) {
+      const user = await User.findByIdAndDelete(req.params.id);
+      await cloudinary.v2.uploader.destroy(user.imageId);
       res.status(200).json("Successfully Deleted");
     } else {
       res.status(403).json("Only admin can delete");
@@ -179,6 +182,10 @@ export const DeleteAllUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
     if (user.isAdmin) {
+      const users = await User.find({});
+      users.map(async (user) => {
+        await cloudinary.v2.uploader.destroy(user.imageId);
+      });
       await User.deleteMany({ isAdmin: false });
       res.status(200).json("All account have been deleted");
     } else {

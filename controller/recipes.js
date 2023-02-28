@@ -11,7 +11,9 @@ export const AddingRecipe = async (req, res, next) => {
       const { name, image } = req.body;
       const imageLink = await cloudinary.v2.uploader.upload(image, {
         folder: "artisan-bakery/recipes",
-        public_id: name.toLowerCase().replaceAll(" ", "-"),
+        public_id: name.includes(" ")
+          ? name.toLowerCase().replaceAll(" ", "-")
+          : name.toLowerCase(),
       });
       const newRecipe = new Recipes({
         ...req.body,
@@ -67,7 +69,9 @@ export const UpdateRecipe = async (req, res, next) => {
         await cloudinary.v2.uploader.destroy(findRecipe.imageId);
         imageLink = await cloudinary.v2.uploader.upload(image, {
           folder: "artisan-bakery/recipes",
-          public_id: name.toLowerCase().replaceAll(" ", "-"),
+          public_id: name.includes(" ")
+            ? name.toLowerCase().replaceAll(" ", "-")
+            : name.toLowerCase(),
         });
         imageValue = true;
       }
