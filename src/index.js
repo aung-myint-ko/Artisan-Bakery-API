@@ -1,8 +1,8 @@
 import express from "express";
 import mongoose from "mongoose";
-import dotenv, { config } from "dotenv";
+import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import ApiRoutes from "./routes/api.routes.js";
+import ApiRoutes from "../routes/api.routes.js";
 import cors from "cors";
 const app = express();
 dotenv.config();
