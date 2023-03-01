@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
 import { CreateError } from "./error.js";
 import cloudinary from "../cloudinary.js";
+import slugify from "slugify";
 
 //signup function for both user and admin
 export const SignUp = async (req, res, next) => {
@@ -118,14 +119,13 @@ export const AddingPhoto = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const user = await User.findById(userId);
+    const public_id = slugify(user.name, { lower: true });
     if (user.imageUrl.length > 0) {
       await cloudinary.v2.uploader.destroy(user.imageId);
     }
     const imageLink = await cloudinary.v2.uploader.upload(req.body.image, {
       folder: "artisan-bakery/user",
-      public_id: user.name.includes(" ")
-        ? user.name.toLowerCase().replaceAll(" ", "-")
-        : user.name.toLowerCase(),
+      public_id,
     });
 
     await User.findByIdAndUpdate(

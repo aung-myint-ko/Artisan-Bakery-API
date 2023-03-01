@@ -3,17 +3,17 @@ import User from "../modules/User.js";
 import { CreateError } from "./error.js";
 import cloudinary from "../cloudinary.js";
 import slugify from "slugify";
+import _ from "lodash";
 
 export const AddingRecipe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
     if (user.isAdmin) {
       const { name, image } = req.body;
+      const public_id = slugify(name, { lower: true });
       const imageLink = await cloudinary.v2.uploader.upload(image, {
         folder: "artisan-bakery/recipes",
-        public_id: name.includes(" ")
-          ? name.toLowerCase().replaceAll(" ", "-")
-          : name.toLowerCase(),
+        public_id,
       });
       const newRecipe = new Recipes({
         ...req.body,
@@ -69,9 +69,7 @@ export const UpdateRecipe = async (req, res, next) => {
         await cloudinary.v2.uploader.destroy(findRecipe.imageId);
         imageLink = await cloudinary.v2.uploader.upload(image, {
           folder: "artisan-bakery/recipes",
-          public_id: name.includes(" ")
-            ? name.toLowerCase().replaceAll(" ", "-")
-            : name.toLowerCase(),
+          public_id: name ? slug : findRecipe.slug,
         });
         imageValue = true;
       }
