@@ -3,7 +3,6 @@ import User from "../modules/User.js";
 import { CreateError } from "./error.js";
 import cloudinary from "../cloudinary.js";
 import slugify from "slugify";
-import _ from "lodash";
 
 export const AddingRecipe = async (req, res, next) => {
   try {
@@ -115,6 +114,7 @@ export const DeleteRecipe = async (req, res, next) => {
       const findRecipe = await Recipes.findOne({ slug: params });
       if (!findRecipe) next(CreateError(404, "recipe not found"));
       await Recipes.findOneAndDelete({ slug: params });
+      await cloudinary.v2.uploader.destroy(findRecipe.imageId);
       res.status(200).json("Successfully deleted");
     } else {
       res.status(403).json("Only admin can delete the data");
@@ -128,6 +128,10 @@ export const DeleteAllRecipes = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
     if (user.isAdmin) {
+      const recipes = await Recipes.find({});
+      recipes.map(async (recipe) => {
+        await cloudinary.v2.uploader.destroy(recipe.imageId);
+      });
       await Recipes.deleteMany({});
       res.status(200).json("Successfully deleted");
     } else {
