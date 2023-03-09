@@ -18,7 +18,7 @@ export const SignUp = async (req, res, next) => {
     const { password, ...other } = savedUser._doc;
     res
       .cookie("access_token", token, {
-        httpOnly: true,
+        expires: new Date(Date.now() + 86400000), // 86400000 milliseconds = 1 day
       })
       .status(201)
       .json(other);
@@ -45,7 +45,6 @@ export const SignIn = async (req, res, next) => {
       const { password, ...other } = findUser._doc;
       res
         .cookie("access_token", token, {
-          httpOnly: true,
           expires: new Date(Date.now() + 86400000), // 86400000 milliseconds = 1 day
         })
         .status(200)
@@ -75,15 +74,8 @@ export const SignInAdmin = async (req, res, next) => {
     } else {
       const token = jwt.sign({ id: findUser._id }, process.env.TOKEN_KEY);
       const { password, ...other } = findUser._doc;
-      const serialized = serialize("access_token", token, {
-        sameSite: "none",
-        path: "/",
-        secure: true,
-      });
-      res.setHeader("Set-Cookie", serialized);
       res
         .cookie("access_token", token, {
-          httpOnly: true,
           expires: new Date(Date.now() + 86400000), // 86400000 milliseconds = 1 day
         })
         .status(200)
