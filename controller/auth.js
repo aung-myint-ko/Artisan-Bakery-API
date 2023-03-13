@@ -18,6 +18,8 @@ export const SignUp = async (req, res, next) => {
     const { password, ...other } = savedUser._doc;
     res
       .cookie("access_token", token, {
+        httpOnly: true,
+
         expires: new Date(Date.now() + 86400000), // 86400000 milliseconds = 1 day
       })
       .status(201)
@@ -45,6 +47,8 @@ export const SignIn = async (req, res, next) => {
       const { password, ...other } = findUser._doc;
       res
         .cookie("access_token", token, {
+          httpOnly: true,
+
           expires: new Date(Date.now() + 86400000), // 86400000 milliseconds = 1 day
         })
         .status(200)
@@ -76,6 +80,8 @@ export const SignInAdmin = async (req, res, next) => {
       const { password, ...other } = findUser._doc;
       res
         .cookie("access_token", token, {
+          httpOnly: true,
+
           expires: new Date(Date.now() + 86400000), // 86400000 milliseconds = 1 day
         })
         .status(200)

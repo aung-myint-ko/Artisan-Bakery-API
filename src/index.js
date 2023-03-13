@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import session from "express-session";
 import compression from "compression";
 import ApiRoutes from "../routes/api.routes.js";
 import cors from "cors";
@@ -14,14 +15,17 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(compression());
 app.use(cookieParser());
 app.use(
+  session({
+    secret: "myCoffee",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: true, sameSite: "none" },
+  })
+);
+app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://artisan-bakery.vercel.app",
     credentials: true,
-    cookie: {
-      sameSite: "none",
-      secure: true,
-      httpOnly: true,
-    },
   })
 );
 
